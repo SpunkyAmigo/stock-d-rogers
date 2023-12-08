@@ -27,29 +27,57 @@ import java.io.*;
 
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 public class HelloApplication extends Application {
     private File currentDirectory;
     private Preferences prefs;
 
-    private static void downloadFile(String fileURL, File saveDir) throws IOException {
+    private static void downloadFileAndExtractLis(String fileURL, File saveDir, String formattedDate) throws IOException {
         URL url = new URL(fileURL);
         URLConnection connection = url.openConnection();
 
-        // Extract the date from the URL and use it as the file name
-        String fileName = fileURL.substring(fileURL.lastIndexOf('/') + 1);
-        String saveFilePath = saveDir.getAbsolutePath() + File.separator + fileName;
+        // Temporary file for ZIP
+        File tempZipFile = File.createTempFile("tempZip", ".zip", saveDir);
 
         try (BufferedInputStream in = new BufferedInputStream(connection.getInputStream());
-             FileOutputStream fileOutputStream = new FileOutputStream(saveFilePath)) {
+             FileOutputStream fileOutputStream = new FileOutputStream(tempZipFile)) {
             byte dataBuffer[] = new byte[1024];
             int bytesRead;
             while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
                 fileOutputStream.write(dataBuffer, 0, bytesRead);
             }
         }
-        System.out.println("Download completed. File saved as " + saveFilePath);
+
+        // Extract .lis file
+        try (ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(tempZipFile))) {
+            ZipEntry entry;
+            while ((entry = zipInputStream.getNextEntry()) != null) {
+                if (entry.getName().endsWith(".lis")) {
+                    File extractedFile = new File(saveDir, formattedDate + ".lis");
+                    extractFile(zipInputStream, extractedFile);
+                    break; // Assuming only one .lis file in the ZIP
+                }
+            }
+        }
+
+        // Delete temporary ZIP file
+        if (!tempZipFile.delete()) {
+            System.err.println("Could not delete temporary ZIP file: " + tempZipFile.getAbsolutePath());
+        }
     }
+
+    private static void extractFile(ZipInputStream zipIn, File file) throws IOException {
+        try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file))) {
+            byte[] bytesIn = new byte[1024];
+            int read;
+            while ((read = zipIn.read(bytesIn)) != -1) {
+                bos.write(bytesIn, 0, read);
+            }
+        }
+    }
+
 
     private List<LocalDate> getDatesInRange(LocalDate start, LocalDate end) {
         List<LocalDate> dates = new ArrayList<>();
@@ -118,7 +146,7 @@ public class HelloApplication extends Application {
                             try {
                                 String formattedDate = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
                                 String dynamicURL = "https://dps.psx.com.pk/download/mkt_summary/" + formattedDate + ".Z";
-                                downloadFile(dynamicURL, currentDirectory);
+                                downloadFileAndExtractLis(dynamicURL, currentDirectory, formattedDate);
 
                                 Platform.runLater(() -> {
                                     Text message = new Text("Download successful for " + formattedDate);
