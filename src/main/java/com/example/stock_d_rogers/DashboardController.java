@@ -3,6 +3,7 @@ package com.example.stock_d_rogers;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -35,6 +36,8 @@ public class DashboardController {
     private Text directoryPathText;
     @FXML
     private VBox messageBox;
+    @FXML
+    private Button downloadButton;
 
     public DashboardController() {
         prefs = Preferences.userNodeForPackage(App.class);
@@ -69,6 +72,7 @@ public class DashboardController {
 
     @FXML
     private void onDownload() {
+        downloadButton.setDisable(true);
         Task<Void> downloadTask = new Task<>() {
             @Override
             protected Void call() {
@@ -106,6 +110,18 @@ public class DashboardController {
                     });
                 }
                 return null;
+            }
+
+            @Override
+            protected void succeeded() {
+                super.succeeded();
+                Platform.runLater(() -> downloadButton.setDisable(false));
+            }
+
+            @Override
+            protected void failed() {
+                super.failed();
+                Platform.runLater(() -> downloadButton.setDisable(false));
             }
         };
 

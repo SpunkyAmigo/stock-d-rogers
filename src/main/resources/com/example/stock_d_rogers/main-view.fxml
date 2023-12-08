@@ -17,7 +17,7 @@
             <DatePicker fx:id="endDatePicker" />
         </HBox>
         <HBox spacing="12" alignment="CENTER_LEFT">
-            <Button text="Download" onAction="#onDownload" />
+            <Button fx:id="downloadButton" text="Download" onAction="#onDownload"/>
             <Text fx:id="directoryPathText" text="/download/path/is/here" onMouseClicked="#onChangeDirectory" />
         </HBox>
         <ScrollPane VBox.vgrow="ALWAYS">
