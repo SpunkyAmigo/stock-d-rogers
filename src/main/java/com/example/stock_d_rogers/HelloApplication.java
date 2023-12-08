@@ -11,16 +11,15 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+import java.util.prefs.Preferences;
+import java.io.*;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 
 public class HelloApplication extends Application {
-    private File currentDirectory = new File(System.getProperty("user.home"), "Downloads"); // Default directory
+    private File currentDirectory;
+    private Preferences prefs;
 
     private static void downloadFile(String fileURL, File saveDir) throws IOException {
         URL url = new URL(fileURL);
@@ -43,6 +42,9 @@ public class HelloApplication extends Application {
 
     @Override
     public void start(Stage stage) {
+        prefs = Preferences.userNodeForPackage(HelloApplication.class);
+        String defaultDirectory = prefs.get("downloadDirectory", System.getProperty("user.home") + File.separator + "Downloads");
+        currentDirectory = new File(defaultDirectory);
         String fileURL = "https://dps.psx.com.pk/download/mkt_summary/2023-12-07.Z";
 
         VBox root = new VBox();
@@ -58,6 +60,7 @@ public class HelloApplication extends Application {
             if (selectedDirectory != null) {
                 currentDirectory = selectedDirectory;
                 directoryPath.setText("Download Directory: " + currentDirectory.getAbsolutePath());
+                prefs.put("downloadDirectory", currentDirectory.getAbsolutePath()); // Save to preferences
             }
         });
 
