@@ -65,6 +65,13 @@ public class HelloApplication extends Application {
         VBox root = new VBox();
         root.setPadding(new Insets(20));
 
+        // display success messages
+        VBox messageBox = new VBox();
+        messageBox.setSpacing(5);
+
+        Button clearMessagesBtn = new Button("Clear Messages");
+        clearMessagesBtn.setOnAction(e -> messageBox.getChildren().clear());
+
         // directory
         HBox directoryHBox = new HBox();
         Text directoryPath = new Text("Download Directory: " + currentDirectory.getAbsolutePath());
@@ -104,26 +111,27 @@ public class HelloApplication extends Application {
                         String formattedDate = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
                         String dynamicURL = "https://dps.psx.com.pk/download/mkt_summary/" + formattedDate + ".Z";
                         downloadFile(dynamicURL, currentDirectory);
-                        successMessage.setText("Download successful for " + formattedDate);
-                        successMessage.setFill(Color.GREEN);
+                        Text message = new Text("Download successful for " + formattedDate);
+                        message.setFill(Color.GREEN);
+                        messageBox.getChildren().add(message);
                     } catch (Exception e) {
-                        successMessage.setText("Download failed for " + date + ": " + e.getMessage());
-                        successMessage.setFill(Color.RED);
-                        break; // stop downloading further if any fails
+                        Text message = new Text("Download failed for " + date + ": " + e.getMessage());
+                        message.setFill(Color.RED);
+                        messageBox.getChildren().add(message);
                     }
                 }
             } else {
-                successMessage.setText("Invalid date range");
-                successMessage.setFill(Color.RED);
+                Text message = new Text("Invalid date range");
+                message.setFill(Color.RED);
+                messageBox.getChildren().add(message);
             }
         });
 
         dateSelectionBox.getChildren().addAll(startDatePicker, endDatePicker);
 
-
         // assemble javafx components
         root.setSpacing(10);
-        root.getChildren().addAll(directoryHBox, successMessage, downloadBtn, dateSelectionBox);
+        root.getChildren().addAll(directoryHBox, downloadBtn, dateSelectionBox, clearMessagesBtn, messageBox);
 
         Scene scene = new Scene(root, 500, 500);
         stage.setTitle("Brokerage House");
