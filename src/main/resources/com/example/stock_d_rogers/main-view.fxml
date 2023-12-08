@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.*?>
 
 <?import javafx.scene.text.Text?>
-<VBox VBox.vgrow="ALWAYS" prefWidth="600" prefHeight="600" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.stock_d_rogers.DashboardController">
+<VBox VBox.vgrow="ALWAYS" prefWidth="680" prefHeight="600" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.stock_d_rogers.DashboardController">
     <HBox style="-fx-background-color: orange; -fx-padding: 16 32;" alignment="CENTER">
         <Text text="Stock D'Rogers" style="-fx-font-size: 32;"  fill="white" />
     </HBox>
