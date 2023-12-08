@@ -60,7 +60,7 @@
                         <!-- Default configuration for running with: mvn clean javafx:run -->
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>com.example.stock_d_rogers/com.example.stock_d_rogers.HelloApplication
+                            <mainClass>com.example.stock_d_rogers/com.example.stock_d_rogers.App
                             </mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>
