@@ -1,6 +1,8 @@
 package com.example.stock_d_rogers;
 
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -102,30 +104,49 @@ public class HelloApplication extends Application {
         Text successMessage = new Text();
         Button downloadBtn = new Button("Download");
         downloadBtn.setOnAction((event) -> {
-            LocalDate startDate = startDatePicker.getValue();
-            LocalDate endDate = endDatePicker.getValue();
-            if (startDate != null && endDate != null && !startDate.isAfter(endDate)) {
-                List<LocalDate> datesInRange = getDatesInRange(startDate, endDate);
-                for (LocalDate date : datesInRange) {
-                    try {
-                        String formattedDate = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-                        String dynamicURL = "https://dps.psx.com.pk/download/mkt_summary/" + formattedDate + ".Z";
-                        downloadFile(dynamicURL, currentDirectory);
-                        Text message = new Text("Download successful for " + formattedDate);
-                        message.setFill(Color.GREEN);
-                        messageBox.getChildren().add(message);
-                    } catch (Exception e) {
-                        Text message = new Text("Download failed for " + date + ": " + e.getMessage());
-                        message.setFill(Color.RED);
-                        messageBox.getChildren().add(message);
+            Task<Void> downloadTask = new Task<>() {
+                @Override
+                protected Void call() {
+                    LocalDate startDate = startDatePicker.getValue();
+                    LocalDate endDate = endDatePicker.getValue();
+                    if (startDate != null && endDate != null && !startDate.isAfter(endDate)) {
+                        List<LocalDate> datesInRange = getDatesInRange(startDate, endDate);
+                        for (LocalDate date : datesInRange) {
+                            if (isCancelled()) {
+                                break;
+                            }
+                            try {
+                                String formattedDate = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                                String dynamicURL = "https://dps.psx.com.pk/download/mkt_summary/" + formattedDate + ".Z";
+                                downloadFile(dynamicURL, currentDirectory);
+
+                                Platform.runLater(() -> {
+                                    Text message = new Text("Download successful for " + formattedDate);
+                                    message.setFill(Color.GREEN);
+                                    messageBox.getChildren().add(message);
+                                });
+                            } catch (Exception e) {
+                                Platform.runLater(() -> {
+                                    Text message = new Text("Download failed for " + date + ": " + e.getMessage());
+                                    message.setFill(Color.RED);
+                                    messageBox.getChildren().add(message);
+                                });
+                            }
+                        }
+                    } else {
+                        Platform.runLater(() -> {
+                            Text message = new Text("Invalid date range");
+                            message.setFill(Color.RED);
+                            messageBox.getChildren().add(message);
+                        });
                     }
+                    return null;
                 }
-            } else {
-                Text message = new Text("Invalid date range");
-                message.setFill(Color.RED);
-                messageBox.getChildren().add(message);
-            }
+            };
+
+            new Thread(downloadTask).start();
         });
+
 
         dateSelectionBox.getChildren().addAll(startDatePicker, endDatePicker);
 
