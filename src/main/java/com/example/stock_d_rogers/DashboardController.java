@@ -5,6 +5,8 @@ import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
@@ -72,7 +74,6 @@ public class DashboardController {
 
     @FXML
     private void onDownload() {
-        downloadButton.setDisable(true);
         Task<Void> downloadTask = new Task<>() {
             @Override
             protected Void call() {
@@ -84,18 +85,30 @@ public class DashboardController {
                         if (isCancelled()) {
                             break;
                         }
+
+                        String formattedDate = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd EEEE"));
+                        Text loadingMessage = new Text("Downloading for " + formattedDate + "...");
+                        ProgressIndicator progressIndicator = new ProgressIndicator();
+                        progressIndicator.setPrefSize(13, 13);
+                        final HBox[] hbox = new HBox[1];
+                        Platform.runLater(() -> {
+                            hbox[0] = new HBox(5, loadingMessage, progressIndicator);
+                            messageBox.getChildren().add(hbox[0]);
+                        });
+
                         try {
-                            String formattedDate = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd EEEE"));
                             String dynamicURL = "https://dps.psx.com.pk/download/mkt_summary/" + date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + ".Z";
                             downloadFileAndExtractLis(dynamicURL, currentDirectory, formattedDate);
 
                             Platform.runLater(() -> {
+                                messageBox.getChildren().remove(hbox[0]);
                                 Text message = new Text("Download successful for " + formattedDate);
                                 message.setFill(Color.GREEN);
                                 messageBox.getChildren().add(message);
                             });
                         } catch (Exception e) {
                             Platform.runLater(() -> {
+                                messageBox.getChildren().remove(hbox[0]);
                                 Text message = new Text("Download failed for " + date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd EEEE")) + ": " + e.getMessage());
                                 message.setFill(Color.RED);
                                 messageBox.getChildren().add(message);
@@ -111,22 +124,11 @@ public class DashboardController {
                 }
                 return null;
             }
-
-            @Override
-            protected void succeeded() {
-                super.succeeded();
-                Platform.runLater(() -> downloadButton.setDisable(false));
-            }
-
-            @Override
-            protected void failed() {
-                super.failed();
-                Platform.runLater(() -> downloadButton.setDisable(false));
-            }
         };
 
         new Thread(downloadTask).start();
     }
+
 
     private void downloadFileAndExtractLis(String fileURL, File saveDir, String formattedDate) throws IOException {
         File tempZipFile = null;
