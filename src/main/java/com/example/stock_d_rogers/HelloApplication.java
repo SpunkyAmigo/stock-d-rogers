@@ -102,8 +102,8 @@ public class HelloApplication extends Application {
         dateSelectionBox.setPadding(new Insets(10));
         dateSelectionBox.setSpacing(10);
 
-        DatePicker startDatePicker = new DatePicker();
-        DatePicker endDatePicker = new DatePicker();
+        DatePicker startDatePicker = new DatePicker(LocalDate.now()); // Set to today's date
+        DatePicker endDatePicker = new DatePicker(LocalDate.now()); // Set to today's date
         Button printDatesButton = new Button("Print Dates");
 
         printDatesButton.setOnAction(e -> {
