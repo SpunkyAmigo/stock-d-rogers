@@ -61,7 +61,6 @@ public class HelloApplication extends Application {
         prefs = Preferences.userNodeForPackage(HelloApplication.class);
         String defaultDirectory = prefs.get("downloadDirectory", System.getProperty("user.home") + File.separator + "Downloads");
         currentDirectory = new File(defaultDirectory);
-        String fileURL = "https://dps.psx.com.pk/download/mkt_summary/2023-12-07.Z";
 
         VBox root = new VBox();
         root.setPadding(new Insets(20));
