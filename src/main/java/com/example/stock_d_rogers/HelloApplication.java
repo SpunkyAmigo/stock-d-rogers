@@ -35,38 +35,41 @@ public class HelloApplication extends Application {
     private Preferences prefs;
 
     private static void downloadFileAndExtractLis(String fileURL, File saveDir, String formattedDate) throws IOException {
-        URL url = new URL(fileURL);
-        URLConnection connection = url.openConnection();
+        File tempZipFile = null;
 
-        // Temporary file for ZIP
-        File tempZipFile = File.createTempFile("tempZip", ".zip", saveDir);
+        try {
+            tempZipFile = File.createTempFile("tempZip", ".zip", saveDir);
+            URL url = new URL(fileURL);
+            URLConnection connection = url.openConnection();
 
-        try (BufferedInputStream in = new BufferedInputStream(connection.getInputStream());
-             FileOutputStream fileOutputStream = new FileOutputStream(tempZipFile)) {
-            byte dataBuffer[] = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
-                fileOutputStream.write(dataBuffer, 0, bytesRead);
-            }
-        }
-
-        // Extract .lis file
-        try (ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(tempZipFile))) {
-            ZipEntry entry;
-            while ((entry = zipInputStream.getNextEntry()) != null) {
-                if (entry.getName().endsWith(".lis")) {
-                    File extractedFile = new File(saveDir, formattedDate + ".lis");
-                    extractFile(zipInputStream, extractedFile);
-                    break; // Assuming only one .lis file in the ZIP
+            try (BufferedInputStream in = new BufferedInputStream(connection.getInputStream());
+                 FileOutputStream fileOutputStream = new FileOutputStream(tempZipFile)) {
+                byte dataBuffer[] = new byte[1024];
+                int bytesRead;
+                while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
+                    fileOutputStream.write(dataBuffer, 0, bytesRead);
                 }
             }
-        }
 
-        // Delete temporary ZIP file
-        if (!tempZipFile.delete()) {
-            System.err.println("Could not delete temporary ZIP file: " + tempZipFile.getAbsolutePath());
+            // Extract .lis file
+            try (ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(tempZipFile))) {
+                ZipEntry entry;
+                while ((entry = zipInputStream.getNextEntry()) != null) {
+                    if (entry.getName().endsWith(".lis")) {
+                        File extractedFile = new File(saveDir, formattedDate + ".lis");
+                        extractFile(zipInputStream, extractedFile);
+                        break; // Assuming only one .lis file in the ZIP
+                    }
+                }
+            }
+        } finally {
+            // Ensure the temporary ZIP file is deleted
+            if (tempZipFile != null && !tempZipFile.delete()) {
+                System.err.println("Could not delete temporary ZIP file: " + tempZipFile.getAbsolutePath());
+            }
         }
     }
+
 
     private static void extractFile(ZipInputStream zipIn, File file) throws IOException {
         try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file))) {
