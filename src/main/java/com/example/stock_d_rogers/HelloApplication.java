@@ -5,12 +5,18 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.DatePicker;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.prefs.Preferences;
 import java.io.*;
 
@@ -38,6 +44,15 @@ public class HelloApplication extends Application {
             }
         }
         System.out.println("Download completed. File saved as " + saveFilePath);
+    }
+
+    private List<LocalDate> getDatesInRange(LocalDate start, LocalDate end) {
+        List<LocalDate> dates = new ArrayList<>();
+        long daysBetween = ChronoUnit.DAYS.between(start, end);
+        for (int i = 0; i <= daysBetween; i++) {
+            dates.add(start.plusDays(i));
+        }
+        return dates;
     }
 
     @Override
@@ -82,9 +97,32 @@ public class HelloApplication extends Application {
             }
         });
 
+        // date selection
+        VBox dateSelectionBox = new VBox();
+        dateSelectionBox.setPadding(new Insets(10));
+        dateSelectionBox.setSpacing(10);
+
+        DatePicker startDatePicker = new DatePicker();
+        DatePicker endDatePicker = new DatePicker();
+        Button printDatesButton = new Button("Print Dates");
+
+        printDatesButton.setOnAction(e -> {
+            LocalDate startDate = startDatePicker.getValue();
+            LocalDate endDate = endDatePicker.getValue();
+            if (startDate != null && endDate != null && !startDate.isAfter(endDate)) {
+                List<LocalDate> datesInRange = getDatesInRange(startDate, endDate);
+                datesInRange.forEach(System.out::println);
+            } else {
+                System.out.println("Invalid date range");
+            }
+        });
+
+        dateSelectionBox.getChildren().addAll(startDatePicker, endDatePicker, printDatesButton);
+
+
         // assemble javafx components
         root.setSpacing(10);
-        root.getChildren().addAll(directoryHBox, successMessage, downloadBtn);
+        root.getChildren().addAll(directoryHBox, successMessage, downloadBtn, dateSelectionBox);
 
         Scene scene = new Scene(root, 500, 500);
         stage.setTitle("Brokerage House");
