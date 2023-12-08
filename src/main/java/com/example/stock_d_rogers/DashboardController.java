@@ -3,9 +3,9 @@ package com.example.stock_d_rogers;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -39,7 +39,7 @@ public class DashboardController {
     @FXML
     private VBox messageBox;
     @FXML
-    private Button downloadButton;
+    private TextField formatTextField;
 
     public DashboardController() {
         prefs = Preferences.userNodeForPackage(App.class);
@@ -52,6 +52,11 @@ public class DashboardController {
         startDatePicker.setValue(LocalDate.now());
         endDatePicker.setValue(LocalDate.now());
         directoryPathText.setText("Download Directory: " + currentDirectory.getAbsolutePath());
+        formatTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+            saveFormatPattern();
+        });
+        String savedFormatPattern = prefs.get("formatPattern", "yyyy-MM-dd"); // Default format
+        formatTextField.setText(savedFormatPattern);
     }
 
     @FXML
@@ -98,7 +103,7 @@ public class DashboardController {
 
                         try {
                             String dynamicURL = "https://dps.psx.com.pk/download/mkt_summary/" + date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + ".Z";
-                            downloadFileAndExtractLis(dynamicURL, currentDirectory, formattedDate);
+                            downloadFileAndExtractLis(dynamicURL, currentDirectory, date);
 
                             Platform.runLater(() -> {
                                 messageBox.getChildren().remove(hbox[0]);
@@ -130,7 +135,20 @@ public class DashboardController {
     }
 
 
-    private void downloadFileAndExtractLis(String fileURL, File saveDir, String formattedDate) throws IOException {
+    private void downloadFileAndExtractLis(String fileURL, File saveDir, LocalDate date) throws IOException {
+        String formatPattern = formatTextField.getText().isEmpty() ? "yyyy-MM-dd" : formatTextField.getText();
+        DateTimeFormatter formatter;
+        try {
+            formatter = DateTimeFormatter.ofPattern(formatPattern);
+        } catch (IllegalArgumentException e) {
+            formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd"); // Fallback to default on invalid format
+            Platform.runLater(() -> {
+                Text message = new Text("Invalid format pattern. Using default: yyyy-MM-dd");
+                message.setFill(Color.ORANGE);
+                messageBox.getChildren().add(message);
+            });
+        }
+        String formattedDate = date.format(formatter);
         File tempZipFile = null;
 
         try {
@@ -189,5 +207,10 @@ public class DashboardController {
 
     public void setStage(Stage stage) {
         this.stage = stage;
+    }
+
+    private void saveFormatPattern() {
+        String formatPattern = formatTextField.getText();
+        prefs.put("formatPattern", formatPattern);
     }
 }

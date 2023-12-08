@@ -15,9 +15,10 @@
         <HBox spacing="12">
             <DatePicker fx:id="startDatePicker" />
             <DatePicker fx:id="endDatePicker" />
+            <TextField fx:id="formatTextField" promptText="yyyy-MM-dd" />
         </HBox>
         <HBox spacing="12" alignment="CENTER_LEFT">
-            <Button fx:id="downloadButton" text="Download" onAction="#onDownload"/>
+            <Button text="Download" onAction="#onDownload"/>
             <Text fx:id="directoryPathText" text="/download/path/is/here" onMouseClicked="#onChangeDirectory" style="-fx-cursor: hand;" />
         </HBox>
         <ScrollPane VBox.vgrow="ALWAYS">
