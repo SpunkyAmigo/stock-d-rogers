@@ -81,8 +81,8 @@ public class DashboardController {
                             break;
                         }
                         try {
-                            String formattedDate = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-                            String dynamicURL = "https://dps.psx.com.pk/download/mkt_summary/" + formattedDate + ".Z";
+                            String formattedDate = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd EEEE"));
+                            String dynamicURL = "https://dps.psx.com.pk/download/mkt_summary/" + date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + ".Z";
                             downloadFileAndExtractLis(dynamicURL, currentDirectory, formattedDate);
 
                             Platform.runLater(() -> {
@@ -92,7 +92,7 @@ public class DashboardController {
                             });
                         } catch (Exception e) {
                             Platform.runLater(() -> {
-                                Text message = new Text("Download failed for " + date + ": " + e.getMessage());
+                                Text message = new Text("Download failed for " + date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd EEEE")) + ": " + e.getMessage());
                                 message.setFill(Color.RED);
                                 messageBox.getChildren().add(message);
                             });
