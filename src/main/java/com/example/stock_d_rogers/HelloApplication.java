@@ -7,6 +7,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
@@ -63,7 +65,6 @@ public class HelloApplication extends Application {
         currentDirectory = new File(defaultDirectory);
 
         VBox root = new VBox();
-        root.setPadding(new Insets(20));
 
         // display success messages
         VBox messageBox = new VBox();
@@ -92,7 +93,6 @@ public class HelloApplication extends Application {
 
         // date selection
         VBox dateSelectionBox = new VBox();
-        dateSelectionBox.setPadding(new Insets(10));
         dateSelectionBox.setSpacing(10);
 
         DatePicker startDatePicker = new DatePicker(LocalDate.now());
@@ -129,9 +129,16 @@ public class HelloApplication extends Application {
 
         dateSelectionBox.getChildren().addAll(startDatePicker, endDatePicker);
 
+        Pane spacer = new Pane();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        HBox hBox = new HBox();
+        hBox.getChildren().addAll(downloadBtn, spacer, clearMessagesBtn);
+
         // assemble javafx components
         root.setSpacing(10);
-        root.getChildren().addAll(directoryHBox, downloadBtn, dateSelectionBox, clearMessagesBtn, messageBox);
+        root.setPadding(new Insets(20));
+        root.getChildren().addAll(directoryHBox, dateSelectionBox, hBox, messageBox);
 
         Scene scene = new Scene(root, 500, 500);
         stage.setTitle("Brokerage House");
