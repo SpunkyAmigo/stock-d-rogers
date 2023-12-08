@@ -2,10 +2,8 @@ package com.example.stock_d_rogers;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.DatePicker;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
@@ -26,7 +24,7 @@ import java.util.zip.ZipInputStream;
 
 public class DashboardController {
     private File currentDirectory;
-    private Preferences prefs;
+    private final Preferences prefs;
     private Stage stage;
 
     @FXML
@@ -56,7 +54,7 @@ public class DashboardController {
         messageBox.getChildren().clear();
     }
     @FXML
-    private void onChangeDirectory(MouseEvent event) {
+    private void onChangeDirectory() {
         if (stage != null) {
             DirectoryChooser directoryChooser = new DirectoryChooser();
             File selectedDirectory = directoryChooser.showDialog(stage);
@@ -68,7 +66,7 @@ public class DashboardController {
         }
     }
     @FXML
-    private void onDownload(ActionEvent event) {
+    private void onDownload() {
         Task<Void> downloadTask = new Task<>() {
             @Override
             protected Void call() {
@@ -122,7 +120,7 @@ public class DashboardController {
 
             try (BufferedInputStream in = new BufferedInputStream(connection.getInputStream());
                  FileOutputStream fileOutputStream = new FileOutputStream(tempZipFile)) {
-                byte dataBuffer[] = new byte[1024];
+                byte[] dataBuffer = new byte[1024];
                 int bytesRead;
                 while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
                     fileOutputStream.write(dataBuffer, 0, bytesRead);
