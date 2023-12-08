@@ -14,6 +14,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -83,41 +84,42 @@ public class HelloApplication extends Application {
         directoryHBox.setAlignment(Pos.CENTER);
         directoryHBox.getChildren().addAll(directoryPath, changeDirectoryBtn);
 
-        // download
-        Text successMessage = new Text();
-        Button downloadBtn = new Button("Download");
-        downloadBtn.setOnAction((event) -> {
-            try {
-                downloadFile(fileURL, currentDirectory);
-                successMessage.setText("Download successful");
-                successMessage.setFill(Color.GREEN);
-            } catch (Exception e) {
-                successMessage.setText("Download failed: " + e.getMessage());
-                successMessage.setFill(Color.RED);
-            }
-        });
-
         // date selection
         VBox dateSelectionBox = new VBox();
         dateSelectionBox.setPadding(new Insets(10));
         dateSelectionBox.setSpacing(10);
 
-        DatePicker startDatePicker = new DatePicker(LocalDate.now()); // Set to today's date
-        DatePicker endDatePicker = new DatePicker(LocalDate.now()); // Set to today's date
-        Button printDatesButton = new Button("Print Dates");
+        DatePicker startDatePicker = new DatePicker(LocalDate.now());
+        DatePicker endDatePicker = new DatePicker(LocalDate.now());
 
-        printDatesButton.setOnAction(e -> {
+        // download
+        Text successMessage = new Text();
+        Button downloadBtn = new Button("Download");
+        downloadBtn.setOnAction((event) -> {
             LocalDate startDate = startDatePicker.getValue();
             LocalDate endDate = endDatePicker.getValue();
             if (startDate != null && endDate != null && !startDate.isAfter(endDate)) {
                 List<LocalDate> datesInRange = getDatesInRange(startDate, endDate);
-                datesInRange.forEach(System.out::println);
+                for (LocalDate date : datesInRange) {
+                    try {
+                        String formattedDate = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                        String dynamicURL = "https://dps.psx.com.pk/download/mkt_summary/" + formattedDate + ".Z";
+                        downloadFile(dynamicURL, currentDirectory);
+                        successMessage.setText("Download successful for " + formattedDate);
+                        successMessage.setFill(Color.GREEN);
+                    } catch (Exception e) {
+                        successMessage.setText("Download failed for " + date + ": " + e.getMessage());
+                        successMessage.setFill(Color.RED);
+                        break; // stop downloading further if any fails
+                    }
+                }
             } else {
-                System.out.println("Invalid date range");
+                successMessage.setText("Invalid date range");
+                successMessage.setFill(Color.RED);
             }
         });
 
-        dateSelectionBox.getChildren().addAll(startDatePicker, endDatePicker, printDatesButton);
+        dateSelectionBox.getChildren().addAll(startDatePicker, endDatePicker);
 
 
         // assemble javafx components
