@@ -7,11 +7,11 @@
 <?import javafx.scene.layout.*?>
 
 <?import javafx.scene.text.Text?>
-<VBox prefWidth="500" prefHeight="600" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.stock_d_rogers.DashboardController">
+<VBox VBox.vgrow="ALWAYS" prefWidth="600" prefHeight="600" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.stock_d_rogers.DashboardController">
     <HBox style="-fx-background-color: orange; -fx-padding: 16 32;" alignment="CENTER">
         <Text text="Stock D'Rogers" style="-fx-font-size: 32;"  fill="white" />
     </HBox>
-    <VBox style="-fx-padding: 16 32;" spacing="12">
+    <VBox style="-fx-padding: 16 32;" spacing="12" VBox.vgrow="ALWAYS">
         <HBox spacing="12">
             <DatePicker fx:id="startDatePicker" />
             <DatePicker fx:id="endDatePicker" />
@@ -20,7 +20,9 @@
             <Button text="Download" onAction="#onDownload" />
             <Text fx:id="directoryPathText" text="/download/path/is/here" onMouseClicked="#onChangeDirectory" />
         </HBox>
-        <VBox fx:id="messageBox" />
+        <ScrollPane VBox.vgrow="ALWAYS">
+            <VBox fx:id="messageBox" />
+        </ScrollPane>
         <Button text="Clear" onAction="#onClear" />
     </VBox>
 </VBox>

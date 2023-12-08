@@ -53,6 +53,7 @@ public class DashboardController {
     private void onClear() {
         messageBox.getChildren().clear();
     }
+
     @FXML
     private void onChangeDirectory() {
         if (stage != null) {
@@ -65,6 +66,7 @@ public class DashboardController {
             }
         }
     }
+
     @FXML
     private void onDownload() {
         Task<Void> downloadTask = new Task<>() {
