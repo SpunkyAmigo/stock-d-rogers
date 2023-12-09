@@ -16,11 +16,15 @@ import javafx.stage.Stage;
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.prefs.Preferences;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -246,7 +250,7 @@ public class DashboardController {
 
                 // Create a row and fill the cells with data
                 HSSFRow row = sheet.createRow(rownum++);
-                row.createCell(0).setCellValue(values[0]); // Date
+                row.createCell(0).setCellValue(convertDate(values[0])); // Date
                 row.createCell(1).setCellValue(values[1]); // Ticker
                 row.createCell(2).setCellValue(Double.parseDouble(values[4])); // Open
                 row.createCell(3).setCellValue(Double.parseDouble(values[5])); // High
@@ -263,5 +267,24 @@ public class DashboardController {
             workbook.write(out);
         }
         workbook.close();
+    }
+
+    private String convertDate(String dateStr) {
+        // Extract day, month, and year from the date string
+        int day = Integer.parseInt(dateStr.substring(0, 2));
+        String monthStr = dateStr.substring(2, 5);
+        int year = Integer.parseInt(dateStr.substring(5));
+
+        // Convert month string to integer
+        try {
+            int month = new SimpleDateFormat("MMM").parse(monthStr).getMonth() + 1;
+            Date date = new Date(year - 1900, month - 1, day);
+            SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yy");
+            return formatter.format(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return dateStr;
     }
 }
