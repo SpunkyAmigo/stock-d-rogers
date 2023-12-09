@@ -25,6 +25,13 @@ import java.util.prefs.Preferences;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.CreationHelper;
+
 public class DashboardController {
     private File currentDirectory;
     private final Preferences prefs;
@@ -136,20 +143,8 @@ public class DashboardController {
 
 
     private void downloadFileAndExtractLis(String fileURL, File saveDir, LocalDate date) throws IOException {
-        String formatPattern = formatTextField.getText().isEmpty() ? "yyyy-MM-dd" : formatTextField.getText();
-        DateTimeFormatter formatter;
-        try {
-            formatter = DateTimeFormatter.ofPattern(formatPattern);
-        } catch (IllegalArgumentException e) {
-            formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd"); // Fallback to default on invalid format
-            Platform.runLater(() -> {
-                Text message = new Text("Invalid format pattern. Using default: yyyy-MM-dd");
-                message.setFill(Color.ORANGE);
-                messageBox.getChildren().add(message);
-            });
-        }
-        String formattedDate = date.format(formatter);
         File tempZipFile = null;
+        File lisFile = null;
 
         try {
             tempZipFile = File.createTempFile("tempZip", ".zip", saveDir);
@@ -165,13 +160,19 @@ public class DashboardController {
                 }
             }
 
-            // Extract .lis file
+            // Extract .lis file and immediately convert to .xls
             try (ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(tempZipFile))) {
                 ZipEntry entry;
                 while ((entry = zipInputStream.getNextEntry()) != null) {
                     if (entry.getName().endsWith(".lis")) {
-                        File extractedFile = new File(saveDir, formattedDate + ".lis");
-                        extractFile(zipInputStream, extractedFile);
+                        // Construct the .lis file path
+                        String formattedDate = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                        lisFile = new File(saveDir, formattedDate + ".lis");
+                        // Extract the .lis file
+                        extractFile(zipInputStream, lisFile);
+                        // Convert the .lis file to .xls
+                        File xlsFile = new File(saveDir, formattedDate + ".xls");
+                        convertLisToXls(lisFile, xlsFile);
                         break; // Assuming only one .lis file in the ZIP
                     }
                 }
@@ -181,9 +182,12 @@ public class DashboardController {
             if (tempZipFile != null && !tempZipFile.delete()) {
                 System.err.println("Could not delete temporary ZIP file: " + tempZipFile.getAbsolutePath());
             }
+            // Delete the .lis file if it was created
+            if (lisFile != null && !lisFile.delete()) {
+                System.err.println("Could not delete temporary .lis file: " + lisFile.getAbsolutePath());
+            }
         }
     }
-
 
     private void extractFile(ZipInputStream zipIn, File file) throws IOException {
         try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file))) {
@@ -212,5 +216,52 @@ public class DashboardController {
     private void saveFormatPattern() {
         String formatPattern = formatTextField.getText();
         prefs.put("formatPattern", formatPattern);
+    }
+
+    private void convertLisToXls(File lisFile, File xlsFile) throws IOException {
+        // Create a workbook and a sheet
+        HSSFWorkbook workbook = new HSSFWorkbook();
+        HSSFSheet sheet = workbook.createSheet("Stock Data");
+
+        // Define header row
+        String[] headers = {"Date", "Ticker", "Open", "High", "Low", "Close", "Vol", ""};
+
+        // Create header row
+        HSSFRow headerRow = sheet.createRow(0);
+        for (int i = 0; i < headers.length; i++) {
+            headerRow.createCell(i).setCellValue(headers[i]);
+        }
+
+        // Reading .lis file
+        try (BufferedReader reader = new BufferedReader(new FileReader(lisFile))) {
+            String line;
+            int rownum = 1;
+            while ((line = reader.readLine()) != null) {
+                // Assuming the data is separated by "|"
+                String[] values = line.split("\\|");
+
+                // Assuming the format of the data is consistent with your provided example
+                // Skip if the line does not contain expected data
+                if (values.length < 9) continue;
+
+                // Create a row and fill the cells with data
+                HSSFRow row = sheet.createRow(rownum++);
+                row.createCell(0).setCellValue(values[0]); // Date
+                row.createCell(1).setCellValue(values[1]); // Ticker
+                row.createCell(2).setCellValue(Double.parseDouble(values[4])); // Open
+                row.createCell(3).setCellValue(Double.parseDouble(values[5])); // High
+                row.createCell(4).setCellValue(Double.parseDouble(values[6])); // Low
+                row.createCell(5).setCellValue(Double.parseDouble(values[7])); // Close
+                row.createCell(6).setCellValue(Double.parseDouble(values[8])); // Vol
+                row.createCell(7).setCellValue(Double.parseDouble(values[9])); // Blank
+                // Add more cells if there are more columns in your .lis file
+            }
+        }
+
+        // Write the workbook to the output file
+        try (FileOutputStream out = new FileOutputStream(xlsFile)) {
+            workbook.write(out);
+        }
+        workbook.close();
     }
 }
