@@ -144,8 +144,7 @@ public class DashboardController {
 
         new Thread(downloadTask).start();
     }
-
-
+    
     private void downloadFileAndExtractLis(String fileURL, File saveDir, LocalDate date) throws IOException {
         File tempZipFile = null;
         File lisFile = null;
@@ -202,7 +201,6 @@ public class DashboardController {
             }
         }
     }
-
 
     private List<LocalDate> getDatesInRange(LocalDate start, LocalDate end) {
         List<LocalDate> dates = new ArrayList<>();
