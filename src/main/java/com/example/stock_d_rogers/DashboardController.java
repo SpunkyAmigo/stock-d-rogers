@@ -95,8 +95,9 @@ public class DashboardController {
                 LocalDate startDate = startDatePicker.getValue();
                 LocalDate endDate = endDatePicker.getValue();
                 if (startDate != null && endDate != null && !startDate.isAfter(endDate)) {
-                    List<LocalDate> datesInRange = getDatesInRange(startDate, endDate);
-                    for (LocalDate date : datesInRange) {
+                    long daysBetween = ChronoUnit.DAYS.between(startDate, endDate);
+                    for (int i = 0; i <= daysBetween; i++) {
+                        LocalDate date = startDate.plusDays(i);
                         if (isCancelled()) {
                             break;
                         }
@@ -199,15 +200,6 @@ public class DashboardController {
                 bos.write(bytesIn, 0, read);
             }
         }
-    }
-
-    private List<LocalDate> getDatesInRange(LocalDate start, LocalDate end) {
-        List<LocalDate> dates = new ArrayList<>();
-        long daysBetween = ChronoUnit.DAYS.between(start, end);
-        for (int i = 0; i <= daysBetween; i++) {
-            dates.add(start.plusDays(i));
-        }
-        return dates;
     }
 
     public void setStage(Stage stage) {
