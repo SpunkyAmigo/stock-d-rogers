@@ -24,7 +24,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.prefs.Preferences;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -32,13 +31,11 @@ import java.util.zip.ZipInputStream;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.CreationHelper;
 
 public class DashboardController {
-    private File currentDirectory;
-    private final Preferences prefs;
+    public static final String DEFAULT_DIRECTORY = System.getProperty("user.home") + File.separator + "Downloads";
+    private static final Preferences PREFS = Preferences.userNodeForPackage(App.class);
+
     private Stage stage;
 
     @FXML
@@ -52,21 +49,20 @@ public class DashboardController {
     @FXML
     private TextField formatTextField;
 
+
     public DashboardController() {
-        prefs = Preferences.userNodeForPackage(App.class);
-        String defaultDirectory = prefs.get("downloadDirectory", System.getProperty("user.home") + File.separator + "Downloads");
-        currentDirectory = new File(defaultDirectory);
+
     }
 
     @FXML
     private void initialize() {
         startDatePicker.setValue(LocalDate.now());
         endDatePicker.setValue(LocalDate.now());
-        directoryPathText.setText("Download Directory: " + currentDirectory.getAbsolutePath());
+        setDirectoryPathText();
         formatTextField.textProperty().addListener((observable, oldValue, newValue) -> {
             saveFormatPattern();
         });
-        String savedFormatPattern = prefs.get("formatPattern", "yyyy-MM-dd"); // Default format
+        String savedFormatPattern = PREFS.get("formatPattern", "yyyy-MM-dd"); // Default format
         formatTextField.setText(savedFormatPattern);
     }
 
@@ -78,12 +74,15 @@ public class DashboardController {
     @FXML
     private void onChangeDirectory() {
         if (stage != null) {
+            // Create instance for choosing directory
+            // and show as dialog
             DirectoryChooser directoryChooser = new DirectoryChooser();
             File selectedDirectory = directoryChooser.showDialog(stage);
+
+            // If a directory is selected
             if (selectedDirectory != null) {
-                currentDirectory = selectedDirectory;
-                directoryPathText.setText("Download Directory: " + currentDirectory.getAbsolutePath());
-                prefs.put("downloadDirectory", currentDirectory.getAbsolutePath());
+                // Override the current preferences for 'downloadDirectory'
+                setDirectoryPref(selectedDirectory.getAbsolutePath());
             }
         }
     }
@@ -114,7 +113,7 @@ public class DashboardController {
 
                         try {
                             String dynamicURL = "https://dps.psx.com.pk/download/mkt_summary/" + date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + ".Z";
-                            downloadFileAndExtractLis(dynamicURL, currentDirectory, date);
+                            downloadFileAndExtractLis(dynamicURL, new File(getDirectory()), date);
 
                             Platform.runLater(() -> {
                                 messageBox.getChildren().remove(hbox[0]);
@@ -144,7 +143,7 @@ public class DashboardController {
 
         new Thread(downloadTask).start();
     }
-    
+
     private void downloadFileAndExtractLis(String fileURL, File saveDir, LocalDate date) throws IOException {
         File tempZipFile = null;
         File lisFile = null;
@@ -217,7 +216,7 @@ public class DashboardController {
 
     private void saveFormatPattern() {
         String formatPattern = formatTextField.getText();
-        prefs.put("formatPattern", formatPattern);
+        PREFS.put("formatPattern", formatPattern);
     }
 
     private void convertLisToXls(File lisFile, File xlsFile) throws IOException {
@@ -284,5 +283,18 @@ public class DashboardController {
         }
 
         return dateStr;
+    }
+
+    private String getDirectory() {
+        return PREFS.get("downloadDirectory", DEFAULT_DIRECTORY);
+    }
+
+    private void setDirectoryPref(String path) {
+        PREFS.put("downloadDirectory", path);
+        setDirectoryPathText();
+    }
+
+    private void setDirectoryPathText() {
+        directoryPathText.setText("Download Directory: " + getDirectory());
     }
 }
