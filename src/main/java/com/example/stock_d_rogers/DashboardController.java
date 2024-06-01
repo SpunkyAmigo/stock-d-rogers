@@ -3,6 +3,7 @@ package com.example.stock_d_rogers;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
@@ -48,11 +49,11 @@ public class DashboardController {
     private VBox messageBox;
     @FXML
     private TextField formatTextField;
+    @FXML
+    private Button downloadButton;
 
 
-    public DashboardController() {
-
-    }
+    public DashboardController() {}
 
     @FXML
     private void initialize() {
@@ -89,6 +90,7 @@ public class DashboardController {
 
     @FXML
     private void onDownload() {
+        downloadButton.setDisable(true);
         Task<Void> downloadTask = new Task<>() {
             @Override
             protected Void call() {
@@ -145,6 +147,12 @@ public class DashboardController {
                     });
                 }
                 return null;
+            }
+
+            @Override
+            protected void done() {
+                super.done();
+                Platform.runLater(() -> downloadButton.setDisable(false));
             }
         };
 
