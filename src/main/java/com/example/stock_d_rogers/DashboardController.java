@@ -20,6 +20,7 @@ import java.net.URLConnection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.DayOfWeek;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -100,6 +101,13 @@ public class DashboardController {
                     long daysBetween = ChronoUnit.DAYS.between(startDate, endDate);
                     for (int i = 0; i <= daysBetween; i++) {
                         LocalDate date = startDate.plusDays(i);
+
+                        // Skip weekends
+                        DayOfWeek dayOfWeek = date.getDayOfWeek();
+                        if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
+                            continue;
+                        }
+
                         if (isCancelled()) {
                             break;
                         }
