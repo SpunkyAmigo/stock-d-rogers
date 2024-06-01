@@ -1,29 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
 <?import javafx.scene.text.Text?>
-<VBox VBox.vgrow="ALWAYS" prefWidth="680" prefHeight="600" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.stock_d_rogers.DashboardController">
+<VBox VBox.vgrow="ALWAYS"
+      prefWidth="680"
+      prefHeight="600"
+      xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.example.stock_d_rogers.DashboardController"
+>
     <HBox style="-fx-background-color: orange; -fx-padding: 16 32;" alignment="CENTER">
-        <Text text="Stock D'Rogers" style="-fx-font-size: 32;"  fill="white" />
+        <Text text="Stock D'Rogers" style="-fx-font-size: 32;" fill="white"/>
     </HBox>
     <VBox style="-fx-padding: 16 32;" spacing="12" VBox.vgrow="ALWAYS">
         <HBox spacing="12">
-            <DatePicker fx:id="startDatePicker" />
-            <DatePicker fx:id="endDatePicker" />
-            <TextField fx:id="formatTextField" promptText="yyyy-MM-dd" />
+            <VBox>
+                <Label text="Start Date"/>
+                <DatePicker fx:id="startDatePicker"/>
+            </VBox>
+            <VBox>
+                <Label text="End Date"/>
+                <DatePicker fx:id="endDatePicker"/>
+            </VBox>
+            <VBox>
+                <Label text="Date Format"/>
+                <TextField fx:id="formatTextField" promptText="yyyy-MM-dd"/>
+            </VBox>
         </HBox>
         <HBox spacing="12" alignment="CENTER_LEFT">
             <Button fx:id="downloadButton" text="Download" onAction="#onDownload"/>
-            <Text fx:id="directoryPathText" text="/download/path/is/here" onMouseClicked="#onChangeDirectory" style="-fx-cursor: hand;" />
+            <Text fx:id="directoryPathText" text="/download/path/is/here" onMouseClicked="#onChangeDirectory"
+                  style="-fx-cursor: hand;"/>
         </HBox>
         <ScrollPane VBox.vgrow="ALWAYS">
-            <VBox fx:id="messageBox" />
+            <VBox fx:id="messageBox"/>
         </ScrollPane>
-        <Button text="Clear" onAction="#onClear" />
+        <Button text="Clear" onAction="#onClear"/>
     </VBox>
 </VBox>
