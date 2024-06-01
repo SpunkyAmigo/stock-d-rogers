@@ -102,22 +102,35 @@ public class DashboardController {
                     for (int i = 0; i <= daysBetween; i++) {
                         LocalDate date = startDate.plusDays(i);
 
+                        if (isCancelled()) {
+                            break;
+                        }
+
                         // Skip weekends
                         DayOfWeek dayOfWeek = date.getDayOfWeek();
                         if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
                             continue;
                         }
 
-                        if (isCancelled()) {
-                            break;
+                        String formattedDate = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+                        // Skip already downloaded files
+                        File xlsFile = new File(getDirectory(), formattedDate + ".xls");
+                        if (xlsFile.exists()) {
+                            Platform.runLater(() -> {
+                                Text message = new Text("File already exists for " + formattedDate);
+                                message.setFill(Color.BLUE);
+                                messageBox.getChildren().add(message);
+                            });
+                            continue;
                         }
 
                         // Loading indication
-                        String formattedDate = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd EEEE"));
                         Text loadingMessage = new Text("Downloading for " + formattedDate + "...");
                         ProgressIndicator progressIndicator = new ProgressIndicator();
                         progressIndicator.setPrefSize(13, 13);
                         final HBox hbox = new HBox(5, loadingMessage, progressIndicator);
+
 
                         Platform.runLater(() -> {
                             messageBox.getChildren().add(hbox);
