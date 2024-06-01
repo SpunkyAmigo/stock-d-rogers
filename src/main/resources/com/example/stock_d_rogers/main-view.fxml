@@ -12,7 +12,9 @@
       fx:controller="com.example.stock_d_rogers.DashboardController"
 >
     <HBox style="-fx-background-color: orange; -fx-padding: 16 32;" alignment="CENTER">
-        <Text text="Stock D'Rogers" style="-fx-font-size: 32;" fill="white"/>
+        <Text text="Stock D'Rogers"
+              style="-fx-font-size: 64; -fx-font-family: 'Dancing Script'; -fx-font-weight: BOLD;"
+              fill="white"/>
     </HBox>
     <VBox style="-fx-padding: 16 32;" spacing="12" VBox.vgrow="ALWAYS">
         <HBox spacing="12">
@@ -31,8 +33,9 @@
         </HBox>
         <HBox spacing="12" alignment="CENTER_LEFT">
             <Button fx:id="downloadButton" text="Download" onAction="#onDownload"/>
-            <Text fx:id="directoryPathText" text="/download/path/is/here" onMouseClicked="#onChangeDirectory"
-                  style="-fx-cursor: hand;"/>
+            <Text fx:id="directoryPathText"
+                  text="/download/path/is/here"
+                  onMouseClicked="#onChangeDirectory"/>
         </HBox>
         <ScrollPane VBox.vgrow="ALWAYS">
             <VBox fx:id="messageBox"/>
