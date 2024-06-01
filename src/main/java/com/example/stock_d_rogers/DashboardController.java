@@ -117,9 +117,10 @@ public class DashboardController {
                         // Skip already downloaded files
                         File xlsFile = new File(getDirectory(), formattedDate + ".xls");
                         if (xlsFile.exists()) {
+                            // Display message that the file already exists
+                            Text message = new Text("File already exists for " + formattedDate);
+                            message.setFill(Color.BLUE);
                             Platform.runLater(() -> {
-                                Text message = new Text("File already exists for " + formattedDate);
-                                message.setFill(Color.BLUE);
                                 messageBox.getChildren().add(message);
                             });
                             continue;
@@ -131,13 +132,14 @@ public class DashboardController {
                         progressIndicator.setPrefSize(13, 13);
                         final HBox hbox = new HBox(5, loadingMessage, progressIndicator);
 
-
+                        // Update UI to load the progress indicator
                         Platform.runLater(() -> {
                             messageBox.getChildren().add(hbox);
                         });
 
                         Text message = new Text();
                         try {
+                            // Download and extract the .lis file
                             String dynamicURL = "https://dps.psx.com.pk/download/mkt_summary/"
                                     + date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
                                     + ".Z";
@@ -153,7 +155,8 @@ public class DashboardController {
                             message.setFill(Color.RED);
                         }
 
-                        // Update UI
+                        // Update UI to remove the progress indicator
+                        // and add the message of success or failure
                         Platform.runLater(() -> {
                             messageBox.getChildren().remove(hbox);
                             messageBox.getChildren().add(message);
