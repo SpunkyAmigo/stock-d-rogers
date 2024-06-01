@@ -35,6 +35,7 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 
 public class DashboardController {
     public static final String DEFAULT_DIRECTORY = System.getProperty("user.home") + File.separator + "Downloads";
+    public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
     private static final Preferences PREFS = Preferences.userNodeForPackage(App.class);
 
     private Stage stage;
@@ -63,8 +64,7 @@ public class DashboardController {
         formatTextField.textProperty().addListener((observable, oldValue, newValue) -> {
             saveFormatPattern();
         });
-        String savedFormatPattern = PREFS.get("formatPattern", "yyyy-MM-dd"); // Default format
-        formatTextField.setText(savedFormatPattern);
+        setFormatTextField();
     }
 
     @FXML
@@ -302,5 +302,11 @@ public class DashboardController {
 
     private void setDirectoryPathText() {
         directoryPathText.setText("Download Directory: " + getDirectory());
+    }
+
+    private void setFormatTextField() {
+        formatTextField.setText(
+                PREFS.get("formatPattern", DEFAULT_DATE_FORMAT)
+        );
     }
 }
