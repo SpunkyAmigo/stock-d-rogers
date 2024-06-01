@@ -102,36 +102,42 @@ public class DashboardController {
                             break;
                         }
 
+                        // Loading indication
                         String formattedDate = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd EEEE"));
                         Text loadingMessage = new Text("Downloading for " + formattedDate + "...");
                         ProgressIndicator progressIndicator = new ProgressIndicator();
                         progressIndicator.setPrefSize(13, 13);
-                        final HBox[] hbox = new HBox[1];
+                        final HBox hbox = new HBox(5, loadingMessage, progressIndicator);
+
                         Platform.runLater(() -> {
-                            hbox[0] = new HBox(5, loadingMessage, progressIndicator);
-                            messageBox.getChildren().add(hbox[0]);
+                            messageBox.getChildren().add(hbox);
                         });
 
+                        Text message = new Text();
                         try {
-                            String dynamicURL = "https://dps.psx.com.pk/download/mkt_summary/" + date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + ".Z";
+                            String dynamicURL = "https://dps.psx.com.pk/download/mkt_summary/"
+                                    + date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                                    + ".Z";
                             downloadFileAndExtractLis(dynamicURL, new File(getDirectory()), date);
 
-                            Platform.runLater(() -> {
-                                messageBox.getChildren().remove(hbox[0]);
-                                Text message = new Text("Download successful for " + formattedDate);
-                                message.setFill(Color.GREEN);
-                                messageBox.getChildren().add(message);
-                            });
+                            // Success indication
+                            message.setText("Download successful for " + formattedDate);
+                            message.setFill(Color.GREEN);
                         } catch (Exception e) {
-                            Platform.runLater(() -> {
-                                messageBox.getChildren().remove(hbox[0]);
-                                Text message = new Text("Download failed for " + date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd EEEE")) + ": " + e.getMessage());
-                                message.setFill(Color.RED);
-                                messageBox.getChildren().add(message);
-                            });
+
+                            // Error indication
+                            message.setText("Download failed for " + date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd EEEE")) + ": " + e.getMessage());
+                            message.setFill(Color.RED);
                         }
+
+                        // Update UI
+                        Platform.runLater(() -> {
+                            messageBox.getChildren().remove(hbox);
+                            messageBox.getChildren().add(message);
+                        });
                     }
                 } else {
+                    // Failure indication
                     Platform.runLater(() -> {
                         Text message = new Text("Invalid date range");
                         message.setFill(Color.RED);
